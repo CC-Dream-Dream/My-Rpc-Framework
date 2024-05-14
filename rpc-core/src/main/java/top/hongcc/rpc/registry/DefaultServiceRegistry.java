@@ -19,11 +19,12 @@ public class DefaultServiceRegistry implements ServiceRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultServiceRegistry.class);
 
+    //  static ，这样就能保证全局唯一的注册信息，并且在创建 RpcServer 时也就不需要传入
     // 服务名(接口名）与提供服务的对象（接口实现类名）的对应关系保存
-    private final Map<String, Object> serviceMap = new ConcurrentHashMap<>();
+    private static final Map<String, Object> serviceMap = new ConcurrentHashMap<>();
 
     // 保存当前有哪些对象已经被注册
-    private final Set<String> registeredService = ConcurrentHashMap.newKeySet();
+    private static final Set<String> registeredService = ConcurrentHashMap.newKeySet();
 
 
     @Override

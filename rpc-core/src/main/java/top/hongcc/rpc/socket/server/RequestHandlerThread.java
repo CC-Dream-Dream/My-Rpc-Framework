@@ -1,4 +1,4 @@
-package top.hongcc.rpc.server;
+package top.hongcc.rpc.socket.server;
 
 import lombok.SneakyThrows;
 import org.slf4j.Logger;

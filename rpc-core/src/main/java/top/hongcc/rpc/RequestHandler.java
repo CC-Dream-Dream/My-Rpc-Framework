@@ -1,4 +1,4 @@
-package top.hongcc.rpc.server;
+package top.hongcc.rpc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
