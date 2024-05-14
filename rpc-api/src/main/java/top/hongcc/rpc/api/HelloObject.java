@@ -6,7 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * description: HelloObject
+ * description: HelloObject 测试用的api的实体类
  * date: 2024/5/13 18:53
  * author: hcc
  * version: 1.0
