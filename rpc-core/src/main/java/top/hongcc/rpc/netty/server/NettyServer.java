@@ -13,6 +13,7 @@ import top.hongcc.rpc.RpcServer;
 import top.hongcc.rpc.codec.CommonDecoder;
 import top.hongcc.rpc.codec.CommonEncoder;
 import top.hongcc.rpc.serializer.JsonSerializer;
+import top.hongcc.rpc.serializer.KryoSerializer;
 
 /**
  * description: NIO方式服务提供侧
@@ -39,7 +40,9 @@ public class NettyServer implements RpcServer {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new CommonEncoder(new JsonSerializer()));
+                            // 编码器，解码器和数据处理器
+//                            pipeline.addLast(new CommonEncoder(new JsonSerializer()));
+                            pipeline.addLast(new CommonEncoder(new KryoSerializer()));
                             pipeline.addLast(new CommonDecoder());
                             pipeline.addLast(new NettyServerHandler());
                         }
