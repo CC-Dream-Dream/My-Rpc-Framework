@@ -1,4 +1,4 @@
-package top.hongcc.rpc.socket.client;
+package top.hongcc.rpc.transport.socket.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,10 +8,14 @@ import top.hongcc.rpc.RpcClient;
 import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
 import top.hongcc.rpc.exception.RpcException;
+import top.hongcc.rpc.registry.NacosServiceRegistry;
+import top.hongcc.rpc.registry.ServiceRegistry;
+import top.hongcc.rpc.serializer.CommonSerializer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
@@ -22,12 +26,12 @@ public class SocketClient implements RpcClient{
 
     private static final Logger logger = LoggerFactory.getLogger(SocketClient.class);
 
-    private final String host;
-    private final int port;
+    private final ServiceRegistry serviceRegistry;
 
-    public SocketClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+    private CommonSerializer serializer;
+
+    public SocketClient() {
+        this.serviceRegistry = new NacosServiceRegistry();
     }
 
     /**
@@ -37,7 +41,13 @@ public class SocketClient implements RpcClient{
      */
     @Override
     public Object sendRequest(RpcRequest rpcRequest) {
-        try (Socket socket = new Socket(host, port)) {
+        if(serializer == null) {
+            logger.error("未设置序列化器");
+            throw new RpcException(RpcError.SERIALIZER_NOT_FOUND);
+        }
+        InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
+        try (Socket socket = new Socket()) {
+            socket.connect(inetSocketAddress);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
             objectOutputStream.writeObject(rpcRequest);
@@ -58,4 +68,8 @@ public class SocketClient implements RpcClient{
         }
     }
 
+    @Override
+    public void setSerializer(CommonSerializer serializer) {
+        this.serializer = serializer;
+    }
 }

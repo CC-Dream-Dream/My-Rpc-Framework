@@ -1,20 +1,20 @@
-package top.hongcc.rpc.netty.client;
+package top.hongcc.rpc.transport.netty.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.hongcc.rpc.RpcClient;
-import top.hongcc.rpc.codec.CommonDecoder;
-import top.hongcc.rpc.codec.CommonEncoder;
 import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
-import top.hongcc.rpc.serializer.JsonSerializer;
-import top.hongcc.rpc.serializer.KryoSerializer;
+import top.hongcc.rpc.registry.ServiceRegistry;
+import top.hongcc.rpc.serializer.CommonSerializer;
+import top.hongcc.rpc.registry.NacosServiceRegistry;
+
+import java.net.InetSocketAddress;
 
 /**
  * NIO方式消费侧客户端类
@@ -24,14 +24,10 @@ public class NettyClient implements RpcClient {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
 
-    private String host;
-    private int port;
+    private final ServiceRegistry serviceRegistry;
     private static final Bootstrap bootstrap;
 
-    public NettyClient(String host, int port) {
-        this.host = host;
-        this.port = port;
-    }
+    private CommonSerializer serializer;
 
     /**
      * 配置好了 Netty 客户端，等待发送数据时启动
@@ -41,18 +37,13 @@ public class NettyClient implements RpcClient {
         bootstrap = new Bootstrap();
         bootstrap.group(group)
                 .channel(NioSocketChannel.class)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast(new CommonDecoder())
-//                                .addLast(new CommonEncoder(new JsonSerializer()))
-                                .addLast(new CommonEncoder(new KryoSerializer()))
-                                .addLast(new NettyClientHandler());
-                    }
-                });
+                .option(ChannelOption.SO_KEEPALIVE, true);
     }
+
+    public NettyClient() {
+        this.serviceRegistry = new NacosServiceRegistry();
+    }
+
 
     /**
      * channel 将 RpcRequest 对象写出，并且等待服务端返回的结果。
@@ -63,10 +54,9 @@ public class NettyClient implements RpcClient {
     @Override
     public Object sendRequest(RpcRequest rpcRequest) {
         try {
-            ChannelFuture future = bootstrap.connect(host, port).sync();
-            logger.info("客户端连接到服务器 {}:{}", host, port);
-            Channel channel = future.channel();
-            if(channel != null) {
+            InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
+            Channel channel = ChannelProvider.get(inetSocketAddress, serializer);
+            if(channel.isActive()) {
                 channel.writeAndFlush(rpcRequest).addListener(future1 -> {
                     if(future1.isSuccess()) {
                         logger.info(String.format("客户端发送消息: %s", rpcRequest.toString()));
@@ -84,6 +74,11 @@ public class NettyClient implements RpcClient {
             logger.error("发送消息时有错误发生: ", e);
         }
         return null;
+    }
+
+    @Override
+    public void setSerializer(CommonSerializer serializer) {
+        this.serializer = serializer;
     }
 
 }

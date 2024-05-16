@@ -3,6 +3,7 @@ package top.hongcc.rpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.hongcc.rpc.entity.RpcRequest;
+import top.hongcc.rpc.serializer.CommonSerializer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,5 +18,7 @@ import java.net.Socket;
 public interface RpcClient {
 
     Object sendRequest(RpcRequest rpcRequest);
+
+    void setSerializer(CommonSerializer serializer);
 
 }

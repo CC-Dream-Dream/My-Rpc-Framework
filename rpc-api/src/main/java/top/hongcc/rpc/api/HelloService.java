@@ -7,4 +7,6 @@ public interface HelloService {
 
     String hello(HelloObject object);
 
+    String helloTwice(HelloObject object);
+
 }

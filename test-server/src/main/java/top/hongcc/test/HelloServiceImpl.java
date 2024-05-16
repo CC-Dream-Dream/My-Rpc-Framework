@@ -18,6 +18,12 @@ public class HelloServiceImpl implements HelloService {
     @Override
     public String hello(HelloObject object) {
         logger.info("接收到: {}", object.getMessage());
-        return "这是调用的返回值，id = " + object.getId();
+        return "这是调用的返回值，id = " + object.getId() + ", hello";
+    }
+
+    @Override
+    public String helloTwice(HelloObject object) {
+        logger.info("接收到: {}", object.getMessage());
+        return "这是调用的返回值，id = " + object.getId() + ", hello hello";
     }
 }

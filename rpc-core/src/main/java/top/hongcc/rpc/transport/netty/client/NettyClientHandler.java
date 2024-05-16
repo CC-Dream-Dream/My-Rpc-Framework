@@ -1,4 +1,4 @@
-package top.hongcc.rpc.netty.client;
+package top.hongcc.rpc.transport.netty.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

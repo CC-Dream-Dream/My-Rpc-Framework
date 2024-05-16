@@ -1,11 +1,10 @@
-package top.hongcc.rpc.registry;
+package top.hongcc.rpc.provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.hongcc.enumeration.RpcError;
 import top.hongcc.rpc.exception.RpcException;
 
-import javax.imageio.spi.RegisterableService;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,9 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * author: hcc
  * version: 1.0
  */
-public class DefaultServiceRegistry implements ServiceRegistry {
+public class ServiceProviderImpl implements ServiceProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultServiceRegistry.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceProviderImpl.class);
 
     //  static ，这样就能保证全局唯一的注册信息，并且在创建 RpcServer 时也就不需要传入
     // 服务名(接口名）与提供服务的对象（接口实现类名）的对应关系保存
@@ -28,7 +27,7 @@ public class DefaultServiceRegistry implements ServiceRegistry {
 
 
     @Override
-    public <T> void register(T service) {
+    public <T> void addServiceProvider(T service) {
         String serviceName = service.getClass().getCanonicalName();
         if(registeredService.contains(serviceName)){
             return;
@@ -46,7 +45,7 @@ public class DefaultServiceRegistry implements ServiceRegistry {
     }
 
     @Override
-    public Object getService(String serviceName) {
+    public Object getServiceProvider(String serviceName) {
         Object service = serviceMap.get(serviceName);
         if(service == null){
             throw new RpcException(RpcError.SERVICE_NOT_FOUND);

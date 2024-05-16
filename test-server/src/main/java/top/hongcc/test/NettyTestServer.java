@@ -1,9 +1,8 @@
 package top.hongcc.test;
 
 import top.hongcc.rpc.api.HelloService;
-import top.hongcc.rpc.netty.server.NettyServer;
-import top.hongcc.rpc.registry.DefaultServiceRegistry;
-import top.hongcc.rpc.registry.ServiceRegistry;
+import top.hongcc.rpc.transport.netty.server.NettyServer;
+import top.hongcc.rpc.serializer.KryoSerializer;
 
 /**
  * description: 测试用Netty服务提供者（服务端）
@@ -13,10 +12,9 @@ public class NettyTestServer {
 
     public static void main(String[] args) {
         HelloService helloService = new HelloServiceImpl();
-        ServiceRegistry registry = new DefaultServiceRegistry();
-        registry.register(helloService);
-        NettyServer server = new NettyServer();
-        server.start(9999);
+        NettyServer server = new NettyServer("127.0.0.1", 9999);
+        server.setSerializer(new KryoSerializer());
+        server.publishService(helloService, HelloService.class);
     }
 
 }
