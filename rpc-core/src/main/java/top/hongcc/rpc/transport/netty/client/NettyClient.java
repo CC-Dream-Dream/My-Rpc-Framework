@@ -7,14 +7,18 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.hongcc.enumeration.RpcError;
 import top.hongcc.rpc.RpcClient;
 import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
+import top.hongcc.rpc.exception.RpcException;
 import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
 import top.hongcc.rpc.registry.NacosServiceRegistry;
+import top.hongcc.rpc.util.RpcMessageChecker;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * NIO方式消费侧客户端类
@@ -67,9 +71,10 @@ public class NettyClient implements RpcClient {
                 channel.closeFuture().sync();
                 AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse");
                 RpcResponse rpcResponse = channel.attr(key).get();
+                logger.info("请求和响应id:{}, {}", rpcRequest.getRequestId(), rpcResponse.getRequestId());
+                RpcMessageChecker.check(rpcRequest, rpcResponse); // 校验请求和响应是否正确
                 return rpcResponse.getData();
             }
-
         } catch (InterruptedException e) {
             logger.error("发送消息时有错误发生: ", e);
         }
