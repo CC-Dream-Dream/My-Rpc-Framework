@@ -6,6 +6,7 @@ import top.hongcc.enumeration.RpcError;
 import top.hongcc.rpc.exception.RpcException;
 import top.hongcc.rpc.handler.RequestHandler;
 import top.hongcc.rpc.RpcServer;
+import top.hongcc.rpc.loadBalancer.LoadBalancer;
 import top.hongcc.rpc.provider.ServiceProvider;
 import top.hongcc.rpc.provider.ServiceProviderImpl;
 import top.hongcc.rpc.registry.NacosServiceRegistry;
@@ -36,11 +37,11 @@ public class SocketServer implements RpcServer {
     private final ServiceRegistry serviceRegistry;
     private final ServiceProvider serviceProvider;
 
-    public SocketServer(String host, int port) {
+    public SocketServer(String host, int port, LoadBalancer loadBalancer) {
         this.host = host;
         this.port = port;
         threadPool = ThreadPoolFactory.createDefaultThreadPool("socket-rpc-server");
-        this.serviceRegistry = new NacosServiceRegistry();
+        this.serviceRegistry = new NacosServiceRegistry(loadBalancer);
         this.serviceProvider = new ServiceProviderImpl();
     }
 

@@ -1,6 +1,7 @@
 package top.hongcc.test;
 
 import top.hongcc.rpc.api.HelloService;
+import top.hongcc.rpc.loadBalancer.RandomLoadBalancer;
 import top.hongcc.rpc.serializer.ProtobufSerializer;
 import top.hongcc.rpc.transport.socket.server.SocketServer;
 
@@ -13,7 +14,7 @@ public class SocketTestServer {
 
     public static void main(String[] args) {
         HelloService helloService = new HelloServiceImpl();
-        SocketServer socketServer = new SocketServer("127.0.0.1", 9998);
+        SocketServer socketServer = new SocketServer("127.0.0.1", 9998, new RandomLoadBalancer());
         socketServer.setSerializer(new ProtobufSerializer());
         socketServer.publishService(helloService, HelloService.class);
     }

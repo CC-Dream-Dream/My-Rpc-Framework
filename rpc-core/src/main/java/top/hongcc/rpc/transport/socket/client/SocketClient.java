@@ -8,6 +8,7 @@ import top.hongcc.rpc.RpcClient;
 import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
 import top.hongcc.rpc.exception.RpcException;
+import top.hongcc.rpc.loadBalancer.LoadBalancer;
 import top.hongcc.rpc.registry.NacosServiceRegistry;
 import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
@@ -30,8 +31,8 @@ public class SocketClient implements RpcClient{
 
     private CommonSerializer serializer;
 
-    public SocketClient() {
-        this.serviceRegistry = new NacosServiceRegistry();
+    public SocketClient(LoadBalancer loadBalancer) {
+        this.serviceRegistry = new NacosServiceRegistry(loadBalancer);
     }
 
     /**

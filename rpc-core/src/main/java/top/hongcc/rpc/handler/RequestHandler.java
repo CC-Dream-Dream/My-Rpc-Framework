@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * description: 实际进行过程调用的工作线程，进行rpc的处理器
+ * description: 服务端实际进行过程调用的工作线程，进行rpc的处理器
  * author: hcc
  */
 public class RequestHandler {
@@ -26,6 +26,7 @@ public class RequestHandler {
 
     public Object handle(RpcRequest rpcRequest) {
         Object result = null;
+        // 服务端可从本地服务注册表中获取服务信息
         Object service = serviceProvider.getServiceProvider(rpcRequest.getInterfaceName());
         try {
             result = invokeTargetMethod(rpcRequest, service);

@@ -14,6 +14,7 @@ import top.hongcc.rpc.RpcServer;
 import top.hongcc.rpc.codec.CommonDecoder;
 import top.hongcc.rpc.codec.CommonEncoder;
 import top.hongcc.rpc.exception.RpcException;
+import top.hongcc.rpc.loadBalancer.LoadBalancer;
 import top.hongcc.rpc.provider.ServiceProvider;
 import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
@@ -39,10 +40,10 @@ public class NettyServer implements RpcServer {
 
     private CommonSerializer serializer;
 
-    public NettyServer(String host, int port) {
+    public NettyServer(String host, int port, LoadBalancer loadBalancer) {
         this.host = host;
         this.port = port;
-        serviceRegistry = new NacosServiceRegistry();
+        serviceRegistry = new NacosServiceRegistry(loadBalancer);
         serviceProvider = new ServiceProviderImpl();
     }
 
@@ -59,8 +60,8 @@ public class NettyServer implements RpcServer {
             logger.error("未设置序列化器");
             throw new RpcException(RpcError.SERIALIZER_NOT_FOUND);
         }
-        serviceProvider.addServiceProvider(service);
-        serviceRegistry.register(serviceClass.getCanonicalName(), new InetSocketAddress(host, port));
+        serviceProvider.addServiceProvider(service); // 注册到本地
+        serviceRegistry.register(serviceClass.getCanonicalName(), new InetSocketAddress(host, port)); // 注册到注册中心Nacos
         start();
     }
 

@@ -13,6 +13,9 @@ import java.util.UUID;
 
 /**
  * description: RpcClientProxy 客户端动态代理
+ * RPC的本地存根就是通过动态代理实现的。 本地存根最重要的作用就是让远程调用像本地调用一样直接进行函数调用，无须关心地址空间隔离、
+ * 函数不匹配等问题。本地存根让调用者不需要感知是如何发生RPC调用的，它屏蔽了下游的编解码、序列化、网络通道等一切细节，
+ * 让调用者认为只是发起了一次本地函数调用。
  * author: hcc
  * version: 1.0
  */
@@ -27,6 +30,7 @@ public class RpcClientProxy implements InvocationHandler {
 
     /**
      * getProxy()方法来生成代理对象
+     * 读取需要代理的服务接口的元数据信息，根据获取的类信息生成对应的代理类字节码和实例化代理类，以及创建类对象的目的
      * @param clazz
      * @return
      * @param <T>
@@ -37,7 +41,7 @@ public class RpcClientProxy implements InvocationHandler {
     }
 
     /**
-     * invoke()方法，来指明代理对象的方法被调用时的动作
+     * invoke()方法，来指明 代理对象的方法 被调用时的动作
      * 在这里，我们需要生成一个RpcRequest对象，发送出去，然后返回从服务端接收到的结果即可：
      * @param proxy the proxy instance that the method was invoked on
      *

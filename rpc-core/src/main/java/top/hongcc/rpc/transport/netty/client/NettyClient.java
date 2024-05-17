@@ -12,6 +12,7 @@ import top.hongcc.rpc.RpcClient;
 import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
 import top.hongcc.rpc.exception.RpcException;
+import top.hongcc.rpc.loadBalancer.LoadBalancer;
 import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
 import top.hongcc.rpc.registry.NacosServiceRegistry;
@@ -44,8 +45,8 @@ public class NettyClient implements RpcClient {
                 .option(ChannelOption.SO_KEEPALIVE, true);
     }
 
-    public NettyClient() {
-        this.serviceRegistry = new NacosServiceRegistry();
+    public NettyClient(LoadBalancer loadBalancer) {
+        this.serviceRegistry = new NacosServiceRegistry(loadBalancer);
     }
 
 
@@ -59,6 +60,7 @@ public class NettyClient implements RpcClient {
     public Object sendRequest(RpcRequest rpcRequest) {
         try {
             InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
+            System.out.println("处理请求的ip和port: " + inetSocketAddress.getAddress().getHostName() + inetSocketAddress.getPort());
             Channel channel = ChannelProvider.get(inetSocketAddress, serializer);
             if(channel.isActive()) {
                 channel.writeAndFlush(rpcRequest).addListener(future1 -> {
@@ -69,6 +71,7 @@ public class NettyClient implements RpcClient {
                     }
                 });
                 channel.closeFuture().sync();
+
                 AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse");
                 RpcResponse rpcResponse = channel.attr(key).get();
                 logger.info("请求和响应id:{}, {}", rpcRequest.getRequestId(), rpcResponse.getRequestId());
