@@ -16,7 +16,7 @@ import java.net.Socket;
 
 
 /**
- * description: 处理RpcRequest的工作线程
+ * description: Socket服务端处理RpcRequest的工作线程
  * author: hcc
  */
 public class SocketRequestHandlerThread implements Runnable{
