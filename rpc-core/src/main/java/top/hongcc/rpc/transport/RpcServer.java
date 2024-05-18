@@ -1,4 +1,4 @@
-package top.hongcc.rpc;
+package top.hongcc.rpc.transport;
 
 import top.hongcc.rpc.serializer.CommonSerializer;
 
@@ -16,9 +16,9 @@ public interface RpcServer {
     /**
      * 用于向 Nacos 注册服务
      * @param service
-     * @param serviceClass
+     * @param serviceName
      * @param <T>
      */
-    <T> void publishService(Object service, Class<T> serviceClass);
+    <T> void publishService(Object service, String serviceName);
 
 }

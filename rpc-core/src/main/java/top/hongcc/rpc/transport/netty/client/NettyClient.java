@@ -7,11 +7,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.hongcc.enumeration.RpcError;
-import top.hongcc.rpc.RpcClient;
+import top.hongcc.rpc.transport.RpcClient;
 import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
-import top.hongcc.rpc.exception.RpcException;
 import top.hongcc.rpc.loadBalancer.LoadBalancer;
 import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
@@ -19,7 +17,6 @@ import top.hongcc.rpc.registry.NacosServiceRegistry;
 import top.hongcc.rpc.util.RpcMessageChecker;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * NIO方式消费侧客户端类

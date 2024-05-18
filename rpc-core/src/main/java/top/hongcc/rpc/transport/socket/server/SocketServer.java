@@ -2,20 +2,17 @@ package top.hongcc.rpc.transport.socket.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.hongcc.enumeration.RpcError;
-import top.hongcc.rpc.exception.RpcException;
 import top.hongcc.rpc.handler.RequestHandler;
-import top.hongcc.rpc.RpcServer;
 import top.hongcc.rpc.loadBalancer.LoadBalancer;
 import top.hongcc.rpc.provider.ServiceProvider;
 import top.hongcc.rpc.provider.ServiceProviderImpl;
 import top.hongcc.rpc.registry.NacosServiceRegistry;
 import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
+import top.hongcc.rpc.transport.AbstractRpcServer;
 import top.hongcc.rpc.util.ThreadPoolFactory;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.*;
@@ -25,17 +22,13 @@ import java.util.concurrent.*;
  * author: hcc
  * version: 1.0
  */
-public class SocketServer implements RpcServer {
+public class SocketServer extends AbstractRpcServer {
 
     private static final Logger logger = LoggerFactory.getLogger(SocketServer.class);
 
     private final ExecutorService threadPool;;
-    private final String host;
-    private final int port;
     private CommonSerializer serializer;
     private RequestHandler requestHandler = new RequestHandler();
-    private final ServiceRegistry serviceRegistry;
-    private final ServiceProvider serviceProvider;
 
     public SocketServer(String host, int port, LoadBalancer loadBalancer) {
         this.host = host;
@@ -43,6 +36,7 @@ public class SocketServer implements RpcServer {
         threadPool = ThreadPoolFactory.createDefaultThreadPool("socket-rpc-server");
         this.serviceRegistry = new NacosServiceRegistry(loadBalancer);
         this.serviceProvider = new ServiceProviderImpl();
+        scanServices(); // 自动注册服务
     }
 
     @Override
@@ -63,17 +57,6 @@ public class SocketServer implements RpcServer {
     @Override
     public void setSerializer(CommonSerializer serializer) {
         this.serializer = serializer;
-    }
-
-    @Override
-    public <T> void publishService(Object service, Class<T> serviceClass) {
-        if(serializer == null) {
-            logger.error("未设置序列化器");
-            throw new RpcException(RpcError.SERIALIZER_NOT_FOUND);
-        }
-        serviceProvider.addServiceProvider(service);
-        serviceRegistry.register(serviceClass.getCanonicalName(), new InetSocketAddress(host, port));
-        start();
     }
 
 }

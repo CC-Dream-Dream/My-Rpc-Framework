@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.hongcc.enumeration.ResponseCode;
 import top.hongcc.enumeration.RpcError;
-import top.hongcc.rpc.RpcClient;
+import top.hongcc.rpc.transport.RpcClient;
 import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
 import top.hongcc.rpc.exception.RpcException;

@@ -64,6 +64,10 @@ public class NacosServiceRegistry implements ServiceRegistry{
         try {
             List<Instance> instances = namingService.getAllInstances(serviceName);
             logger.info("instances数量: " + instances.size());
+            if(instances.size() == 0) {
+                logger.error("找不到对应的服务: " + serviceName);
+                throw new RpcException(RpcError.SERVICE_NOT_FOUND);
+            }
             // 负载均衡
             Instance instance = loadBalancer.select(instances);
             return new InetSocketAddress(instance.getIp(), instance.getPort());

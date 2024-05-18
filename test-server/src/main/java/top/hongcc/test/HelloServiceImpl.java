@@ -2,6 +2,7 @@ package top.hongcc.test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.hongcc.rpc.annotation.Service;
 import top.hongcc.rpc.api.HelloObject;
 import top.hongcc.rpc.api.HelloService;
 
@@ -11,6 +12,7 @@ import top.hongcc.rpc.api.HelloService;
  * author: hcc
  * version: 1.0
  */
+@Service
 public class HelloServiceImpl implements HelloService {
 
     private static final Logger logger = LoggerFactory.getLogger(HelloServiceImpl.class);
