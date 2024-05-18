@@ -7,8 +7,6 @@ import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
 import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
-
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,7 +20,6 @@ import java.net.Socket;
 public class SocketRequestHandlerThread implements Runnable{
 
     private static final Logger logger = LoggerFactory.getLogger(SocketRequestHandlerThread.class);
-
     private Socket socket;
     private RequestHandler requestHandler;
     private ServiceRegistry serviceRegistry;
@@ -49,6 +46,5 @@ public class SocketRequestHandlerThread implements Runnable{
         } catch (IOException | ClassNotFoundException e){
             logger.error("调用或发送时有错误发生：", e);
         }
-
     }
 }
