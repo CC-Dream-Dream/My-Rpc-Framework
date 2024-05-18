@@ -4,8 +4,6 @@ import top.hongcc.rpc.api.ByeByeService;
 import top.hongcc.rpc.api.HelloObject;
 import top.hongcc.rpc.api.HelloService;
 import top.hongcc.rpc.transport.RpcClientProxy;
-import top.hongcc.rpc.loadBalancer.RandomLoadBalancer;
-import top.hongcc.rpc.serializer.ProtobufSerializer;
 import top.hongcc.rpc.transport.socket.client.SocketClient;
 
 /**
@@ -16,8 +14,7 @@ import top.hongcc.rpc.transport.socket.client.SocketClient;
 public class SocketTestClient {
 
     public static void main(String[] args) {
-        SocketClient client = new SocketClient(new RandomLoadBalancer());
-        client.setSerializer(new ProtobufSerializer());
+        SocketClient client = new SocketClient();
         RpcClientProxy rpcClientProxy = new RpcClientProxy(client);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);
         HelloObject object = new HelloObject(123, "This is a man");

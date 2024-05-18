@@ -9,9 +9,9 @@ import top.hongcc.rpc.serializer.CommonSerializer;
  */
 public interface RpcServer {
 
-    void start();
+    int DEFAULT_SERIALIZER = CommonSerializer.DEFAULT_SERIALIZER;
 
-    void setSerializer(CommonSerializer serializer);
+    void start();
 
     /**
      * 用于向 Nacos 注册服务

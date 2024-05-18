@@ -7,13 +7,14 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.hongcc.rpc.loadBalancer.RandomLoadBalancer;
+import top.hongcc.rpc.registry.NacosServiceDiscovery;
+import top.hongcc.rpc.registry.ServiceDiscovery;
 import top.hongcc.rpc.transport.RpcClient;
 import top.hongcc.rpc.entity.RpcRequest;
 import top.hongcc.rpc.entity.RpcResponse;
 import top.hongcc.rpc.loadBalancer.LoadBalancer;
-import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
-import top.hongcc.rpc.registry.NacosServiceRegistry;
 import top.hongcc.rpc.util.RpcMessageChecker;
 
 import java.net.InetSocketAddress;
@@ -26,7 +27,7 @@ public class NettyClient implements RpcClient {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
 
-    private final ServiceRegistry serviceRegistry;
+    private final ServiceDiscovery serviceDiscovery;
     private static final Bootstrap bootstrap;
 
     private CommonSerializer serializer;
@@ -42,10 +43,22 @@ public class NettyClient implements RpcClient {
                 .option(ChannelOption.SO_KEEPALIVE, true);
     }
 
-    public NettyClient(LoadBalancer loadBalancer) {
-        this.serviceRegistry = new NacosServiceRegistry(loadBalancer);
+    public NettyClient() {
+        this(DEFAULT_SERIALIZER, new RandomLoadBalancer());
     }
 
+    public NettyClient(LoadBalancer loadBalancer) {
+        this(DEFAULT_SERIALIZER, loadBalancer);
+    }
+
+    public NettyClient(Integer serializer) {
+        this(serializer, new RandomLoadBalancer());
+    }
+
+    public NettyClient(Integer serializer, LoadBalancer loadBalancer) {
+        this.serviceDiscovery = new NacosServiceDiscovery(loadBalancer);
+        this.serializer = CommonSerializer.getByCode(serializer);
+    }
 
     /**
      * channel 将 RpcRequest 对象写出，并且等待服务端返回的结果。
@@ -56,7 +69,8 @@ public class NettyClient implements RpcClient {
     @Override
     public Object sendRequest(RpcRequest rpcRequest) {
         try {
-            InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
+            // 找到服务端地址，发送请求
+            InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest.getInterfaceName());
             System.out.println("处理请求的ip和port: " + inetSocketAddress.getAddress().getHostName() + inetSocketAddress.getPort());
             Channel channel = ChannelProvider.get(inetSocketAddress, serializer);
             if(channel.isActive()) {
@@ -68,7 +82,7 @@ public class NettyClient implements RpcClient {
                     }
                 });
                 channel.closeFuture().sync();
-
+                // 非阻塞获取响应结果
                 AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse");
                 RpcResponse rpcResponse = channel.attr(key).get();
                 logger.info("请求和响应id:{}, {}", rpcRequest.getRequestId(), rpcResponse.getRequestId());
@@ -79,11 +93,6 @@ public class NettyClient implements RpcClient {
             logger.error("发送消息时有错误发生: ", e);
         }
         return null;
-    }
-
-    @Override
-    public void setSerializer(CommonSerializer serializer) {
-        this.serializer = serializer;
     }
 
 }

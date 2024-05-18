@@ -17,8 +17,8 @@ import java.net.Socket;
  */
 public interface RpcClient {
 
-    Object sendRequest(RpcRequest rpcRequest);
+    int DEFAULT_SERIALIZER = CommonSerializer.DEFAULT_SERIALIZER;
 
-    void setSerializer(CommonSerializer serializer);
+    Object sendRequest(RpcRequest rpcRequest);
 
 }

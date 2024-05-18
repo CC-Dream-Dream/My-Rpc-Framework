@@ -1,5 +1,6 @@
 package top.hongcc.rpc.transport;
 
+import com.alibaba.nacos.api.exception.NacosException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.hongcc.rpc.annotation.Service;

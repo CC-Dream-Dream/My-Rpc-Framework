@@ -11,14 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.hongcc.rpc.codec.CommonDecoder;
 import top.hongcc.rpc.codec.CommonEncoder;
-import top.hongcc.rpc.loadBalancer.LoadBalancer;
-import top.hongcc.rpc.provider.ServiceProvider;
-import top.hongcc.rpc.registry.ServiceRegistry;
 import top.hongcc.rpc.serializer.CommonSerializer;
 import top.hongcc.rpc.serializer.KryoSerializer;
 import top.hongcc.rpc.registry.NacosServiceRegistry;
 import top.hongcc.rpc.provider.ServiceProviderImpl;
 import top.hongcc.rpc.transport.AbstractRpcServer;
+import top.hongcc.rpc.hook.ShutdownHook;
+
 
 /**
  * description: NIO方式服务提供侧
@@ -30,16 +29,22 @@ public class NettyServer extends AbstractRpcServer {
 
     private CommonSerializer serializer;
 
-    public NettyServer(String host, int port, LoadBalancer loadBalancer) {
+    public NettyServer(String host, int port) {
+        this(host, port, DEFAULT_SERIALIZER);
+    }
+
+    public NettyServer(String host, int port, Integer serializer) {
         this.host = host;
         this.port = port;
-        serviceRegistry = new NacosServiceRegistry(loadBalancer);
+        serviceRegistry = new NacosServiceRegistry();
         serviceProvider = new ServiceProviderImpl();
-        scanServices(); // 自动注册服务
+        this.serializer = CommonSerializer.getByCode(serializer);
+        scanServices();
     }
 
     @Override
     public void start() {
+        ShutdownHook.getShutdownHook().addClearAllHook();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -57,7 +62,7 @@ public class NettyServer extends AbstractRpcServer {
                             ChannelPipeline pipeline = ch.pipeline();
                             // 编码器，解码器和数据处理器
 //                            pipeline.addLast(new CommonEncoder(new JsonSerializer()));
-                            pipeline.addLast(new CommonEncoder(new KryoSerializer()));
+                            pipeline.addLast(new CommonEncoder(serializer));
                             pipeline.addLast(new CommonDecoder());
                             pipeline.addLast(new NettyServerHandler());
                         }
@@ -71,11 +76,6 @@ public class NettyServer extends AbstractRpcServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }
-
-    @Override
-    public void setSerializer(CommonSerializer serializer) {
-        this.serializer = serializer;
     }
 
 }

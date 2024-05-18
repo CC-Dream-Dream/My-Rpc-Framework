@@ -19,28 +19,30 @@ import java.net.Socket;
  * description: 处理RpcRequest的工作线程
  * author: hcc
  */
-public class RequestHandlerThread implements Runnable{
+public class SocketRequestHandlerThread implements Runnable{
 
-    private static final Logger logger = LoggerFactory.getLogger(RequestHandlerThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(SocketRequestHandlerThread.class);
 
     private Socket socket;
     private RequestHandler requestHandler;
     private ServiceRegistry serviceRegistry;
     private CommonSerializer serializer;
 
-    public RequestHandlerThread(Socket socket, RequestHandler requestHandler, ServiceRegistry serviceRegistry, CommonSerializer serializer) {
+    public SocketRequestHandlerThread(Socket socket, RequestHandler requestHandler, ServiceRegistry serviceRegistry, CommonSerializer serializer) {
         this.socket = socket;
         this.requestHandler = requestHandler;
         this.serviceRegistry = serviceRegistry;
         this.serializer = serializer;
     }
 
+    /**
+     * todo: 根据参数serailizer，使用不同的序列化和反序列化方法
+     */
     @Override
     public void run() {
         try(ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objectInputStream = new ObjectInputStream((socket.getInputStream()))){
             RpcRequest rpcRequest = (RpcRequest) objectInputStream.readObject();
-            String interfaceName = rpcRequest.getInterfaceName();
             Object result = requestHandler.handle(rpcRequest);
             objectOutputStream.writeObject(RpcResponse.success(result, rpcRequest.getRequestId()));
             objectOutputStream.flush();
