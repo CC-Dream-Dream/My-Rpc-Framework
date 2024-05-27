@@ -23,7 +23,7 @@ public class ThreadPoolFactory {
 
     private final static Logger logger = LoggerFactory.getLogger(ThreadPoolFactory.class);
 
-    private static Map<String, ExecutorService> threadPollsMap = new ConcurrentHashMap<>();
+    private static Map<String, ExecutorService> threadPoolsMap = new ConcurrentHashMap<>();
 
     private ThreadPoolFactory() {
     }
@@ -33,11 +33,11 @@ public class ThreadPoolFactory {
     }
 
     public static ExecutorService createDefaultThreadPool(String threadNamePrefix, Boolean daemon) {
-        ExecutorService pool = threadPollsMap.computeIfAbsent(threadNamePrefix, k -> createThreadPool(threadNamePrefix, daemon));
+        ExecutorService pool = threadPoolsMap.computeIfAbsent(threadNamePrefix, k -> createThreadPool(threadNamePrefix, daemon));
         if (pool.isShutdown() || pool.isTerminated()) {
-            threadPollsMap.remove(threadNamePrefix);
+            threadPoolsMap.remove(threadNamePrefix);
             pool = createThreadPool(threadNamePrefix, daemon);
-            threadPollsMap.put(threadNamePrefix, pool);
+            threadPoolsMap.put(threadNamePrefix, pool);
         }
         return pool;
 
@@ -45,7 +45,7 @@ public class ThreadPoolFactory {
 
     public static void shutDownAll() {
         logger.info("关闭所有线程池...");
-        threadPollsMap.entrySet().parallelStream().forEach(entry -> {
+        threadPoolsMap.entrySet().parallelStream().forEach(entry -> {
             ExecutorService executorService = entry.getValue();
             executorService.shutdown();
             logger.info("关闭线程池 [{}] [{}]", entry.getKey(), executorService.isTerminated());

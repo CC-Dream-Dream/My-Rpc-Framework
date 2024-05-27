@@ -8,7 +8,8 @@ test-server文件夹：测试用的服务端项目
 .gitignore：就是.gitignore  
 README.md：就是Readme  
 pom.xml：项目的总的pom  
-
+本项目架构：  
+![img_1.png](img_1.png)  
 RPC调用流程:  
 1.服务消费方（client）调用以本地调用方式调用服务；  
 2.client stub接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体；  
